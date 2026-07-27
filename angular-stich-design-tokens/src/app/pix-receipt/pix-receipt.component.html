@@ -1,0 +1,93 @@
+<!-- Atmospheric Background Elements -->
+<div class="orb orb-accent" aria-hidden="true"></div>
+<div class="orb orb-primary" aria-hidden="true"></div>
+
+<!-- Receipt Card -->
+<div
+  class="receipt-card"
+  [style.transform]="cardTransform()"
+  [style.transition]="cardTransition()"
+  (mousemove)="onCardMouseMove($event)"
+  (mouseleave)="onCardMouseLeave()"
+  (mouseenter)="onCardMouseEnter()"
+>
+  <!-- Success Header -->
+  <div class="success-header">
+    <div class="check-circle-wrapper">
+      <div class="check-circle">
+        <span
+          class="material-symbols-outlined check-icon"
+          aria-hidden="true"
+          >check</span
+        >
+      </div>
+    </div>
+
+    <p class="receipt-label">Comprovante de Transferência</p>
+
+    <h1 class="amount-display">R$ {{ formattedAmount() }}</h1>
+
+    <div class="success-badge">
+      <span class="material-symbols-outlined badge-icon" aria-hidden="true"
+        >contactless</span
+      >
+      <span class="badge-text">Pix realizado com sucesso</span>
+    </div>
+  </div>
+
+  <!-- Transaction Details -->
+  <div class="details-section">
+    <!-- Payee -->
+    <div class="detail-payee">
+      <span class="detail-label">Favorecido</span>
+      <div class="payee-info">
+        <span class="payee-name">{{ recipientName() }}</span>
+        <span class="bank-name">{{ bankName() }}</span>
+      </div>
+    </div>
+
+    <!-- Date and Time -->
+    <div class="detail-grid">
+      <div class="detail-item">
+        <span class="detail-label">Data do pagamento</span>
+        <span class="detail-value">{{ transactionDate() }}</span>
+      </div>
+      <div class="detail-item detail-item--right">
+        <span class="detail-label">Horário</span>
+        <span class="detail-value">{{ transactionTime() }}</span>
+      </div>
+    </div>
+
+    <!-- Transaction ID -->
+    <div class="transaction-id-box">
+      <span class="detail-label">ID da Transação</span>
+      <span class="transaction-id">{{ transactionId() }}</span>
+    </div>
+  </div>
+
+  <!-- Primary Action -->
+  <button type="button" class="btn-primary" (click)="dismiss.emit()">
+    Voltar ao Início
+  </button>
+
+  <!-- Secondary Actions -->
+  <div class="btn-group">
+    <button type="button" class="btn-secondary" (click)="share.emit()">
+      <span class="material-symbols-outlined btn-icon" aria-hidden="true"
+        >share</span
+      >
+      <span>Compartilhar</span>
+    </button>
+    <button type="button" class="btn-secondary" (click)="downloadPdf.emit()">
+      <span class="material-symbols-outlined btn-icon" aria-hidden="true"
+        >download</span
+      >
+      <span>Baixar PDF</span>
+    </button>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="receipt-footer">
+  <p>Lumina Bank &mdash; Instituição de Pagamento S.A.</p>
+</footer>

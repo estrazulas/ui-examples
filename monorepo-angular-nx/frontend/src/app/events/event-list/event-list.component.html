@@ -1,0 +1,22 @@
+<div class="list-container">
+  <div class="glass-card">
+    <h2>Eventos</h2>
+
+    @if (isLoading()) {
+      <p class="loading">Carregando...</p>
+    } @else if (events().length === 0) {
+      <p class="empty">Nenhum evento cadastrado</p>
+    } @else {
+      <div class="event-list">
+        @for (event of events(); track event.id) {
+          <div class="event-item">
+            <h3>{{ event.nome }}</h3>
+            <p><span>Endereço:</span> {{ event.endereco }}</p>
+            <p><span>Capacidade:</span> {{ event.capacidade }}</p>
+            <p><span>Data:</span> {{ event.data }}</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

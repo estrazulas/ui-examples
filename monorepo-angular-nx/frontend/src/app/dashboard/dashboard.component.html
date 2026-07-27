@@ -1,0 +1,43 @@
+<div class="dashboard-container">
+  <h1>Dashboard</h1>
+
+  @if (isLoading()) {
+    <p class="loading">Carregando...</p>
+  } @else {
+    <div class="panels">
+      <div class="panel glass-card">
+        <h2>Eventos</h2>
+        <p class="total">Total: {{ events().length }}</p>
+        @if (events().length === 0) {
+          <p class="empty">Nenhum evento cadastrado</p>
+        } @else {
+          <div class="panel-list">
+            @for (event of events().slice(-5); track event.id) {
+              <div class="panel-item">
+                <strong>{{ event.nome }}</strong>
+                <span>{{ event.data }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="panel glass-card">
+        <h2>Palestras</h2>
+        <p class="total">Total: {{ talks().length }}</p>
+        @if (talks().length === 0) {
+          <p class="empty">Nenhuma palestra submetida</p>
+        } @else {
+          <div class="panel-list">
+            @for (talk of talks().slice(-5); track talk.id) {
+              <div class="panel-item">
+                <strong>{{ talk.talkTitle }}</strong>
+                <span>{{ talk.nome }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

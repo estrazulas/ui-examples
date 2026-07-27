@@ -1,0 +1,22 @@
+<div class="pix-history-list">
+  @for (transaction of transactions(); track transaction.id) {
+    <div class="transaction-item">
+      <div class="transaction-info">
+        <span class="material-symbols-outlined transaction-icon" 
+              [class.received]="transaction.type === 'received'" 
+              [class.sent]="transaction.type === 'sent'">
+          {{ transaction.type === 'received' ? 'arrow_downward' : 'arrow_upward' }}
+        </span>
+        <div class="transaction-details">
+          <span class="transaction-title">{{ transaction.title }}</span>
+          <span class="transaction-date">{{ transaction.date }}</span>
+        </div>
+      </div>
+      <div class="transaction-amount" 
+           [class.received]="transaction.type === 'received'" 
+           [class.sent]="transaction.type === 'sent'">
+        {{ transaction.type === 'received' ? '+' : '-' }} R$ {{ transaction.amount | number:'1.2-2' }}
+      </div>
+    </div>
+  }
+</div>

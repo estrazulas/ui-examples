@@ -1,0 +1,56 @@
+.main-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.main-nav a {
+  color: #888;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: color 0.3s, background 0.3s;
+}
+
+.main-nav a:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.main-nav a.active {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(255, 138, 0, 0.2), rgba(255, 0, 128, 0.2));
+}
+
+.create-link {
+  color: #ff8a00 !important;
+}
+
+.create-link:hover {
+  color: #fff !important;
+  background: rgba(255, 138, 0, 0.15) !important;
+}
+
+.logout-btn {
+  background: rgba(255, 59, 48, 0.1);
+  border: 1px solid rgba(255, 59, 48, 0.3);
+  color: #ff3b30;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 59, 48, 0.2);
+  color: #fff;
+}

@@ -1,0 +1,40 @@
+<header class="mobile-header">
+  <button
+    type="button"
+    class="menu-btn"
+    (click)="toggleMenu()"
+    [attr.aria-label]="isMenuOpen() ? 'Fechar menu' : 'Abrir menu'"
+  >
+    <span class="material-symbols-outlined">
+      {{ isMenuOpen() ? 'close' : 'menu' }}
+    </span>
+  </button>
+  <span class="mobile-logo">Fazendo App</span>
+  <div style="width: 40px;"></div>
+</header>
+
+<aside [class.open]="isMenuOpen()" aria-label="Menu lateral">
+  <h1>Fazendo App</h1>
+
+  <nav>
+    <a routerLink="/pix" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Pix</a>
+    <a routerLink="/extrato" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Extrato</a>
+  </nav>
+
+  <button
+    type="button"
+    class="theme-toggle"
+    [attr.aria-label]="isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
+    (click)="toggleTheme(); closeMenu()"
+  >
+    @if (isDark()) {
+      ☀️
+    } @else {
+      🌙
+    }
+  </button>
+</aside>
+
+<main>
+  <router-outlet />
+</main>

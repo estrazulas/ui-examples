@@ -1,0 +1,45 @@
+<div class="login-container">
+  <form class="glass-card" [formGroup]="loginForm" (ngSubmit)="submit()">
+    <h2>Login do Organizador</h2>
+
+    @if (errorMessage()) {
+      <div class="error-banner" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        [attr.aria-invalid]="loginForm.controls.email.touched && loginForm.controls.email.invalid"
+      />
+      @if (loginForm.controls.email.touched && loginForm.controls.email.hasError('required')) {
+        <span class="error" role="alert">Email é obrigatório.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="senha">Senha</label>
+      <input
+        id="senha"
+        type="password"
+        formControlName="senha"
+        [attr.aria-invalid]="loginForm.controls.senha.touched && loginForm.controls.senha.invalid"
+      />
+      @if (loginForm.controls.senha.touched && loginForm.controls.senha.hasError('required')) {
+        <span class="error" role="alert">Senha é obrigatória.</span>
+      }
+    </div>
+
+    <button type="submit" class="submit-btn" [disabled]="isSubmitting()">
+      @if (isSubmitting()) {
+        Entrando...
+      } @else {
+        Entrar
+      }
+    </button>
+  </form>
+</div>

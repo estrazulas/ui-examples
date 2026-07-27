@@ -1,0 +1,7 @@
+Atuando como um engenheiro de front-end senior especialista em angular 21, execute as tarefas:
+
+    LIMPEZA: Substitua o conteúdo do app.component.html gerado pelo CLI.
+    LAYOUT BASE: Crie uma estrutura semântica simples (<nav>, <aside>, <main>). Adicione um menu lateral com um único item "Pix". Coloque o <router-outlet> ao lado.
+    ROTEAMENTO: Crie um Standalone Component chamado PixTransferComponent. Configure o app.routes.ts para a rota '/pix'.
+    FORMULÁRIO: No PixTransferComponent, crie um formulário HTML usando Signals para gerenciar estado, com os campos: Chave Pix, Valor, Data de Agendamento e Botão Confirmar.
+    RESTRIÇÃO DE ESTILO (CRÍTICO): NÃO gere nenhuma classe CSS ou estilo inline. O Html deve ser 100% puro e cru.

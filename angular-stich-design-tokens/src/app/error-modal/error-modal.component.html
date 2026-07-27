@@ -1,0 +1,36 @@
+<!-- Overlay: fecha ao clicar fora do container -->
+<div class="modal-overlay" (click)="closeModal()" aria-hidden="true">
+  <!-- Container: impede propagacao do click para o overlay -->
+  <div
+    class="modal-container"
+    (click)="$event.stopPropagation()"
+    role="document"
+  >
+    <header class="modal-header">
+      <h2 id="error-modal-title" class="modal-title">{{ title() }}</h2>
+      <button
+        type="button"
+        class="modal-close-btn"
+        (click)="closeModal()"
+        autofocus
+        aria-label="Fechar modal"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </header>
+
+    <div class="modal-body">
+      <p id="error-modal-message" class="modal-message">{{ message() }}</p>
+    </div>
+
+    <footer class="modal-footer">
+      <button
+        type="button"
+        class="modal-action-btn"
+        (click)="closeModal()"
+      >
+        Fechar
+      </button>
+    </footer>
+  </div>
+</div>

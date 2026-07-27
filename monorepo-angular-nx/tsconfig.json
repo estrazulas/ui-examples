@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./frontend-e2e"
+    },
+    {
+      "path": "./api-e2e"
+    },
+    {
+      "path": "./api"
+    },
+    {
+      "path": "./shared-types"
+    },
+    {
+      "path": "./frontend"
+    }
+  ],
+  "compilerOptions": {}
+}

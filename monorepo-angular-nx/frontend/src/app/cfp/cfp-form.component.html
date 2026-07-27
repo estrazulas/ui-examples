@@ -1,0 +1,90 @@
+<div class="cfp-container">
+  <form class="glass-card" (ngSubmit)="submit()">
+    @if (submitted()) {
+      <div class="success" role="alert">
+        Proposta enviada com sucesso!
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="error-banner" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <div class="form-group">
+      <label for="nome">Nome</label>
+      <input
+        id="nome"
+        type="text"
+        [value]="nome()"
+        (input)="nome.set($any($event.target).value)"
+        (blur)="onNomeBlur()"
+        [attr.aria-label]="'Nome do palestrante'"
+        [attr.aria-required]="true"
+        [attr.aria-invalid]="nomeError() || null"
+        [attr.aria-describedby]="nomeError() ? 'nome-error' : null"
+      />
+      @if (nomeError()) {
+        <span id="nome-error" class="error" role="alert">Nome é obrigatório.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        [value]="email()"
+        (input)="email.set($any($event.target).value)"
+        (blur)="onEmailBlur()"
+        [attr.aria-label]="'Email do palestrante'"
+        [attr.aria-required]="true"
+        [attr.aria-invalid]="emailError() || null"
+        [attr.aria-describedby]="emailError() ? 'email-error' : null"
+      />
+      @if (emailError()) {
+        <span id="email-error" class="error" role="alert">Email inválido.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="talkTitle">Título da palestra</label>
+      <input
+        id="talkTitle"
+        type="text"
+        [value]="talkTitle()"
+        (input)="talkTitle.set($any($event.target).value)"
+        (blur)="onTalkTitleBlur()"
+        [attr.aria-label]="'Título da palestra'"
+        [attr.aria-required]="true"
+        [attr.aria-invalid]="talkTitleError() || null"
+        [attr.aria-describedby]="talkTitleError() ? 'talkTitle-error' : null"
+      />
+      @if (talkTitleError()) {
+        <span id="talkTitle-error" class="error" role="alert">Título é obrigatório.</span>
+      }
+    </div>
+
+    <div class="form-group checkbox-field">
+      <label for="isGDE">
+        <input
+          id="isGDE"
+          type="checkbox"
+          [checked]="isGDE()"
+          (change)="isGDE.set($any($event.target).checked)"
+          [attr.aria-label]="'É Google Developer Expert (GDE)'"
+        />
+        É Google Developer Expert (GDE)
+      </label>
+    </div>
+
+    <button type="button" class="submit-btn" [disabled]="isSubmitDisabled()" (click)="submit()">
+      @if (isSubmitting()) {
+        Enviando...
+      } @else {
+        Enviar
+      }
+    </button>
+  </form>
+</div>

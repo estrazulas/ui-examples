@@ -1,0 +1,71 @@
+<div class="cfp-container">
+  <form class="glass-card" [formGroup]="eventForm" (ngSubmit)="submit()">
+    @if (submitted()) {
+      <div class="success" role="alert">
+        Evento criado com sucesso!
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="error-banner" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <div class="form-group">
+      <label for="nome">Nome do evento</label>
+      <input
+        id="nome"
+        type="text"
+        formControlName="nome"
+      />
+      @if (eventForm.controls.nome.touched && eventForm.controls.nome.hasError('required')) {
+        <span class="error" role="alert">Nome é obrigatório.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="endereco">Endereço</label>
+      <input
+        id="endereco"
+        type="text"
+        formControlName="endereco"
+      />
+      @if (eventForm.controls.endereco.touched && eventForm.controls.endereco.hasError('required')) {
+        <span class="error" role="alert">Endereço é obrigatório.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="capacidade">Capacidade</label>
+      <input
+        id="capacidade"
+        type="number"
+        formControlName="capacidade"
+      />
+      @if (eventForm.controls.capacidade.touched && eventForm.controls.capacidade.hasError('required')) {
+        <span class="error" role="alert">Capacidade é obrigatória.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="data">Data</label>
+      <input
+        id="data"
+        type="date"
+        formControlName="data"
+      />
+      @if (eventForm.controls.data.touched && eventForm.controls.data.hasError('required')) {
+        <span class="error" role="alert">Data é obrigatória.</span>
+      }
+    </div>
+
+    <button type="submit" class="submit-btn" [disabled]="isSubmitDisabled()">
+      @if (isSubmitting()) {
+        Criando...
+      } @else {
+        Criar Evento
+      }
+    </button>
+  </form>
+</div>

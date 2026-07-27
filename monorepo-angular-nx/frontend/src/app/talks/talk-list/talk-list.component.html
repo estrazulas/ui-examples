@@ -1,0 +1,22 @@
+<div class="list-container">
+  <div class="glass-card">
+    <h2>Palestras</h2>
+
+    @if (isLoading()) {
+      <p class="loading">Carregando...</p>
+    } @else if (talks().length === 0) {
+      <p class="empty">Nenhuma palestra submetida</p>
+    } @else {
+      <div class="talk-list">
+        @for (talk of talks(); track talk.id) {
+          <div class="talk-item">
+            <h3>{{ talk.talkTitle }}</h3>
+            <p><span>Palestrante:</span> {{ talk.nome }}</p>
+            <p><span>Email:</span> {{ talk.email }}</p>
+            <p><span>GDE:</span> {{ talk.isGDE ? 'Sim' : 'Não' }}</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,56 @@
+@if (!showReceipt()) {
+  <section aria-labelledby="pix-transfer-title">
+    <h2 id="pix-transfer-title">Transferência Pix</h2>
+
+    <form (submit)="confirm($event)">
+      <label for="pix-key">Chave Pix</label>
+      <input
+        #pixKeyInput
+        id="pix-key"
+        type="text"
+        [value]="pixKey()"
+        (input)="updatePixKey(pixKeyInput.value)"
+        autocomplete="off"
+      />
+
+      <label for="amount">Valor</label>
+      <input
+        #amountInput
+        id="amount"
+        type="text"
+        inputmode="decimal"
+        [value]="amount()"
+        (input)="updateAmount(amountInput.value)"
+      />
+
+      <label for="schedule-date">Data de Agendamento</label>
+      <input
+        #scheduleDateInput
+        id="schedule-date"
+        type="date"
+        [value]="scheduleDate()"
+        (input)="updateScheduleDate(scheduleDateInput.value)"
+      />
+
+      <button type="submit" [disabled]="!canConfirm()">Confirmar</button>
+    </form>
+  </section>
+} @else {
+  <app-pix-receipt
+    [amount]="parsedAmount()"
+    [recipientName]="pixKey()"
+    bankName="Lumina Bank"
+    [transactionDate]="scheduleDate()"
+    [transactionTime]="transactionTime()"
+    [transactionId]="transactionId()"
+    (dismiss)="dismissReceipt()"
+  />
+}
+
+@if (showLimitModal()) {
+  <app-error-modal
+    title="Limite Excedido"
+    message="Valor maior que 5000 precisa de autorizacao do gerente"
+    (closed)="closeLimitModal()"
+  />
+}

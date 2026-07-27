@@ -1,0 +1,13 @@
+<nav class="main-nav">
+  <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+  <a routerLink="/events" routerLinkActive="active">Eventos</a>
+  <a routerLink="/talks" routerLinkActive="active">Palestras</a>
+  @if (isAuthenticated) {
+    <a routerLink="/event/new" routerLinkActive="active" class="create-link">+ Criar Evento</a>
+    <a routerLink="/cfp" routerLinkActive="active" class="create-link">+ Criar Palestra</a>
+    <button (click)="logout()" class="logout-btn">Sair</button>
+  } @else {
+    <a routerLink="/login" routerLinkActive="active">Login</a>
+  }
+</nav>
+<router-outlet></router-outlet>
