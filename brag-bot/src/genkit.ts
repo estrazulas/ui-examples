@@ -1,20 +1,9 @@
 import 'dotenv/config';
 import { genkit, z } from 'genkit';
 import { openAI } from '@genkit-ai/compat-oai/openai';
+import { franc } from 'franc';
 
 const ai = genkit({ plugins: [openAI()] });
-
-function detectLanguage(text: string): 'pt' | 'en' | 'other' {
-  const ptMarkers = /\b(para|uma|que|com|foi|pelo|pela|dos|das|não|mais|como|ser|ter|este|esta|isso|também|implementei|reduzi|criei|desenvolvi)\b/i;
-  const enMarkers = /\b(the|and|for|that|with|from|have|been|was|were|this|also|into|their|would|could|implemented|reduced|created|developed|built)\b/i;
-
-  const ptScore = (text.match(ptMarkers) || []).length;
-  const enScore = (text.match(enMarkers) || []).length;
-
-  if (enScore > ptScore && enScore > 0) return 'en';
-  if (ptScore > enScore && ptScore > 0) return 'pt';
-  return 'other';
-}
 
 const BragInputSchema = z.object({
   definition: z.string().describe('Rascunho informal do usuário sobre sua realização no trabalho.'),
@@ -36,40 +25,11 @@ export const bragGeneratorFlow = ai.defineFlow(
     outputSchema: BragSchema,
   },
   async (input) => {
-    const lang = detectLanguage(input.definition);
+    const langCode = franc(input.definition);
 
-    const languageInstruction = lang === 'other'
-      ? `DETECÇÃO DE IDIOMA: Responda EXCLUSIVAMENTE no mesmo idioma do input abaixo.
-Se o input está em espanhol, responda em espanhol. Se está em francês, responda em francês.
-NUNCA misture idiomas. NUNCA traduza. Esta é a regra mais importante.`
-      : `DETECÇÃO DE IDIOMA: O input abaixo está em ${lang === 'en' ? 'inglês' : 'português'}.
+    const prompt = `DETECÇÃO DE IDIOMA: O idioma detectado no input é "${langCode}" (código ISO 639-3).
 TODO o output (title, context, actionTaken, businessImpact, metrics) DEVE ser escrito EXCLUSIVAMENTE no MESMO idioma do input.
-Se o input está em inglês, responda 100% em inglês. Se está em português, responda 100% em português.
-NUNCA misture idiomas. Esta é a regra mais importante.`;
-
-    const fewShot = lang === 'en'
-      ? `Exemplo de output esperado (input em inglês):
-{
-  "title": "Implemented Redis caching layer reducing API latency by 80%",
-  "context": "The API suffered from high latency and timeouts during traffic spikes.",
-  "actionTaken": "Designed and deployed a Redis-based caching strategy for frequently accessed endpoints.",
-  "businessImpact": "80% latency reduction eliminated timeouts during peak hours and improved user experience.",
-  "metrics": ["80% reduction in API latency", "Zero timeouts during peak traffic"],
-  "technologiesUsed": ["Redis", "Node.js", "Express"]
-}`
-      : lang === 'pt'
-        ? `Exemplo de output esperado (input em português):
-{
-  "title": "Implementação de cache Redis reduzindo latência da API em 80%",
-  "context": "A API apresentava alta latência e timeouts durante picos de acesso.",
-  "actionTaken": "Projetou e implementou estratégia de cache com Redis para endpoints mais acessados.",
-  "businessImpact": "Redução de 80% na latência eliminou timeouts em horários de pico e melhorou a experiência do usuário.",
-  "metrics": ["80% de redução na latência da API", "Zero timeouts durante tráfego de pico"],
-  "technologiesUsed": ["Redis", "Node.js", "Express"]
-}`
-        : '';
-
-    const prompt = `${languageInstruction}
+NUNCA misture idiomas. NUNCA traduza. Esta é a regra mais importante.
 
 Atue como um "Senior Career Consultant" focado em Planos de Desenvolvimento Individual (IDP) para Engenheiros de Software.
 
@@ -81,7 +41,27 @@ Regras:
 3. Siga ESTRITAMENTE o formato do schema JSON fornecido. Retorne APENAS um objeto com as chaves: title, context, actionTaken, businessImpact, metrics, technologiesUsed.
 4. Os campos "metrics" e "technologiesUsed" DEVEM ser arrays de strings, não objetos ou strings únicas.
 
-${fewShot ? fewShot + '\n\n' : ''}Rascunho do usuário:
+${langCode === 'eng' ? `Exemplo de output esperado (input em inglês):
+{
+  "title": "Implemented Redis caching layer reducing API latency by 80%",
+  "context": "The API suffered from high latency and timeouts during traffic spikes.",
+  "actionTaken": "Designed and deployed a Redis-based caching strategy for frequently accessed endpoints.",
+  "businessImpact": "80% latency reduction eliminated timeouts during peak hours and improved user experience.",
+  "metrics": ["80% reduction in API latency", "Zero timeouts during peak traffic"],
+  "technologiesUsed": ["Redis", "Node.js", "Express"]
+}
+
+` : langCode === 'por' ? `Exemplo de output esperado (input em português):
+{
+  "title": "Implementação de cache Redis reduzindo latência da API em 80%",
+  "context": "A API apresentava alta latência e timeouts durante picos de acesso.",
+  "actionTaken": "Projetou e implementou estratégia de cache com Redis para endpoints mais acessados.",
+  "businessImpact": "Redução de 80% na latência eliminou timeouts em horários de pico e melhorou a experiência do usuário.",
+  "metrics": ["80% de redução na latência da API", "Zero timeouts durante tráfego de pico"],
+  "technologiesUsed": ["Redis", "Node.js", "Express"]
+}
+
+` : ''}Rascunho do usuário:
 ${input.definition}`;
 
     const response = await ai.generate({
