@@ -140,16 +140,40 @@ Instruções para o Agente:
    - Crie o método real `generateBrag(definition: string)`.
    - O fluxo deve: ligar o signal `loading` (true), fazer um POST para `/api/brag` enviando `{ definition }`, adicionar o resultado da API ao signal da lista de brags, e desligar o `loading` (false). Trate possíveis erros.
 
-5. Atualização do Flow Genkit (genkit.ts) — Detecção de Idioma:
-   - O flow DEVE detectar o idioma do input (PT ou EN) via heurística simples (contagem de palavras-chave de cada idioma).
-   - A instrução de idioma DEVE aparecer no TOPO do prompt, antes de qualquer outra regra, com formulação imperativa:
-     "DETECÇÃO DE IDIOMA: O input abaixo está em ${idioma}. TODO o output DEVE ser escrito EXCLUSIVAMENTE no MESMO idioma do input. NUNCA misture idiomas. Esta é a regra mais importante."
-   - Adicione um few-shot example condicional: se o input for em inglês, mostre um exemplo de output em inglês; se for em português, mostre em português.
-   - Isso resolve o bug onde o modelo ignorava a regra de idioma e gerava sempre em PT-BR mesmo com input em inglês.
+5. Atualização do Flow Genkit (genkit.ts) — Detecção de Idioma com `franc`:
+   - Instale a biblioteca `franc` (`npm install franc`) para detecção de idioma via ISO 639-3.
+   - Crie um arquivo separado `src/prompts/few-shots.ts` contendo:
+     - Um mapa `FEW_SHOTS` com exemplos dedicados para cada idioma suportado.
+     - Cada entrada deve ter: `langCode` (ISO 639-3), `langName` (nome em português), e `example` (JSON válido).
+     - Idiomas suportados: português (`por`), inglês (`eng`), espanhol (`spa`), francês (`fra`), alemão (`deu`), italiano (`ita`).
+     - Exporte também `SUPPORTED_LANGUAGES` como array de nomes para exibição na UI.
+   - No `genkit.ts`, use `franc(input.definition)` para detectar o idioma.
+   - Injete a instrução de idioma no TOPO do prompt com o nome do idioma detectado:
+     "DETECÇÃO DE IDIOMA: O input abaixo está em ${fewShot.langName} (código ISO 639-3: \"${langCode}\").
+     TODO o output DEVE ser escrito EXCLUSIVAMENTE em ${fewShot.langName}.
+     NUNCA misture idiomas. NUNCA traduza. Esta é a regra mais importante."
+   - Injete o few-shot correspondente ao idioma detectado. Para idiomas não mapeados, use instrução genérica sem few-shot.
+   - Isso resolve o bug onde o modelo ignorava a regra de idioma e gerava sempre em PT-BR.
 
-6. Validação de Build (CRÍTICO):
+6. Interface — Idiomas Suportados:
+   - No `DashboardComponent`, importe `SUPPORTED_LANGUAGES` de `src/prompts/few-shots.ts`.
+   - Exiba na interface uma lista dos idiomas suportados abaixo do formulário:
+     "Idiomas suportados: {{ supportedLanguages.join(', ') }}"
+
+7. Testes Unitários (Vitest):
+   - Crie `vitest.config.ts` na raiz do projeto.
+   - Adicione scripts em `package.json`: `"test:unit": "vitest run"` e `"test:unit:watch": "vitest"`.
+   - Crie `src/api.test.ts` com testes de integração para o endpoint `/api/brag`:
+     - **Happy Path** (3 testes): input em PT, EN, ES — valida status 200, mapeamento correto dos campos (EN→PT), e que o Genkit flow foi chamado.
+     - **Error Cases** (7 testes): definition missing, empty string, non-string, null, undefined, Genkit flow throws error, Genkit flow returns null.
+     - **Response Mapping** (3 testes): metrics array→string join, empty metrics array, actionTaken+businessImpact combinados em `impacto`.
+   - Mocke o `bragGeneratorFlow` com `vi.mock('./genkit')` para isolar o endpoint.
+   - Suba um servidor Express efêmero (`app.listen(0)`) para cada suite de testes.
+
+8. Validação de Build (CRÍTICO):
    - Após implementar todas as alterações acima, execute no terminal o comando de build do projeto (ex: `npm run build`).
    - Verifique a saída do terminal. Se o Angular apontar qualquer erro de compilação (TypeScript, dependências ausentes, falha no SSR), corrija o código autonomamente até que o build passe com sucesso.
+   - Execute `npm run test:unit` e garanta que todos os testes passem.
 ```
 
 ## Fluxo da Aplicação
