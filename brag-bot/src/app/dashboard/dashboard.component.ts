@@ -24,7 +24,7 @@ export class DashboardComponent {
 
   onSubmit(): void {
     if (this.prompt.trim()) {
-      this.bragService.generateMockBrag(this.prompt.trim());
+      this.bragService.generateBrag(this.prompt.trim());
       this.prompt = '';
     }
   }

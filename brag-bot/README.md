@@ -113,6 +113,111 @@ Implementação do Fluxo (Flow):
 7. O retorno final da função deve conter todas as propriedades mapeadas pela IA acrescidas de um campo `id` contendo a geração nativa de uma uuid (`crypto.randomUUID()`).
 ```
 
+## Prompt (Spec 04)
+
+```
+Integração Final (Micro-BFF, HttpClient e Validação)
+Contexto: O fluxo `bragGeneratorFlow` já existe. A interface já existe usando um serviço com dados "mockados".
+
+Instruções para o Agente:
+1. USE O MCP DO GENKIT: Consulte o contexto local se necessário para garantir a sintaxe.
+
+2. Backend Seguro (server.ts):
+   - Modifique o arquivo `server.ts` do Angular.
+   - Logo após a inicialização do app Express (`const server = express();`), adicione `server.use(express.json());`
+   - Crie uma rota `server.post('/api/brag', async (req, res) => {...})` ANTES da rota catch-all do Angular (`server.get('*')`).
+   - Dentro da rota, extraia `req.body.definition`.
+   - Invoque o `bragGeneratorFlow` passando exatamente o objeto `{ definition: req.body.definition }`.
+   - Retorne o resultado em JSON. Em caso de erro, retorne status HTTP 500.
+
+3. Configuração do Angular (app.config.ts):
+   - Modifique `src/app/app.config.ts` para fornecer o HttpClient.
+   - Utilize `provideHttpClient(withFetch())` para garantir compatibilidade perfeita com SSR.
+
+4. Atualização do Serviço (brag.service.ts):
+   - Remova completamente o método que gera dados "mockados".
+   - Injete o `HttpClient`.
+   - Crie o método real `generateBrag(definition: string)`.
+   - O fluxo deve: ligar o signal `loading` (true), fazer um POST para `/api/brag` enviando `{ definition }`, adicionar o resultado da API ao signal da lista de brags, e desligar o `loading` (false). Trate possíveis erros.
+
+5. Atualização do Flow Genkit (genkit.ts) — Detecção de Idioma:
+   - O flow DEVE detectar o idioma do input (PT ou EN) via heurística simples (contagem de palavras-chave de cada idioma).
+   - A instrução de idioma DEVE aparecer no TOPO do prompt, antes de qualquer outra regra, com formulação imperativa:
+     "DETECÇÃO DE IDIOMA: O input abaixo está em ${idioma}. TODO o output DEVE ser escrito EXCLUSIVAMENTE no MESMO idioma do input. NUNCA misture idiomas. Esta é a regra mais importante."
+   - Adicione um few-shot example condicional: se o input for em inglês, mostre um exemplo de output em inglês; se for em português, mostre em português.
+   - Isso resolve o bug onde o modelo ignorava a regra de idioma e gerava sempre em PT-BR mesmo com input em inglês.
+
+6. Validação de Build (CRÍTICO):
+   - Após implementar todas as alterações acima, execute no terminal o comando de build do projeto (ex: `npm run build`).
+   - Verifique a saída do terminal. Se o Angular apontar qualquer erro de compilação (TypeScript, dependências ausentes, falha no SSR), corrija o código autonomamente até que o build passe com sucesso.
+```
+
+## Fluxo da Aplicação
+
+```mermaid
+%%{init: {'theme': 'base'}}%%
+graph TD
+  A[Usuario acessa o Dashboard] --> B[Estado vazio: nenhuma conquista gerada]
+  B --> C[Usuario digita descricao da conquista no textarea]
+  C --> D{Texto preenchido?}
+  D -->|Nao| E[Botao desabilitado — aguarda input]
+  D -->|Sim| F[Usuario clica em Destilar Conquista]
+  F --> G[Frontend: loading = true, spinner visivel]
+  G --> H[POST /api/brag com definition]
+  H --> I{Servidor Express\nrecebe a requisicao?}
+  I -->|Nao| J[Erro de rede — loading = false]
+  I -->|Sim| K[Express extrai req.body.definition]
+  K --> L[Express invoca bragGeneratorFlow]
+  L --> M[Genkit monta o prompt\ncom persona + regras + input]
+  M --> N[Genkit chama OpenAI gpt-4o-mini]
+  N --> O{OpenAI retorna\noutput valido?}
+  O -->|Nao| P[Genkit lanca erro\nFalha ao gerar Brag Document]
+  O -->|Sim| Q[Genkit adiciona id = crypto.randomUUID]
+  P --> R[Express retorna HTTP 500]
+  R --> S[Frontend: erro no subscribe\nloading = false]
+  Q --> T[Express mapeia campos\nEN → PT: title→titulo,\ncontext→contexto,\nactionTaken+businessImpact→impacto,\nmetrics→metricas,\ntechnologiesUsed→tecnologias]
+  T --> U[Express retorna JSON mapeado]
+  U --> V[Frontend: adiciona Brag ao signal brags\nloading = false]
+  V --> W[Card renderizado no Dashboard]
+  W --> X[Usuario clica no card]
+  X --> Y[Navegacao para /detail/:id]
+  Y --> Z[DetailComponent exibe Contexto,\nImpacto, Metricas e Tecnologias]
+  Z --> AA[Usuario clica Voltar ao Dashboard]
+  AA --> W
+
+  classDef error fill:#fee,color:#900,stroke:#c00
+  classDef success fill:#efe,color:#060,stroke:#393
+  classDef decision fill:#fff3cd,color:#630,stroke:#c90
+  classDef action fill:#e8e8e8,color:#222,stroke:#666
+  classDef loading fill:#eef,color:#036,stroke:#69c
+  classDef empty fill:#f3e8ff,color:#5a0,stroke:#a3c
+  classDef startend fill:#d4edda,color:#155724,stroke:#28a745
+
+  class J,P,R,S error
+  class Z success
+  class D,I,O decision
+  class C,F,K,L,M,N,T,U,V,W,X,Y,AA action
+  class G loading
+  class B empty
+  class A startend
+```
+
+**Legenda:**
+
+| Classe | Cor | Representa |
+|---|---|---|
+| `startend` | Verde claro | Início do fluxo |
+| `empty` | Roxo claro | Estado vazio (sem conquistas) |
+| `loading` | Azul claro | Spinner / aguardando resposta |
+| `decision` | Amarelo | Pontos de branching |
+| `action` | Cinza | Processos do sistema e interações |
+| `success` | Verde | Conclusão com sucesso |
+| `error` | Vermelho | Falhas e erros |
+
+**Caminhos cobertos:**
+- **Feliz**: input → POST → Genkit → OpenAI → mapeamento EN→PT → card → detalhe
+- **Infelizes**: input vazio, erro de rede, OpenAI sem output válido, erro no Genkit, HTTP 500
+
 ## Comandos
 
 ### Desenvolvimento

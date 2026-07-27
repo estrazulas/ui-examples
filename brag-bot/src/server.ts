@@ -7,23 +7,37 @@ import {
 import express from 'express';
 import { join } from 'node:path';
 import './genkit';
+import { bragGeneratorFlow } from './genkit';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
+app.use(express.json());
 const angularApp = new AngularNodeAppEngine();
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * Micro-BFF: proxy seguro para o bragGeneratorFlow do Genkit.
  */
+app.post('/api/brag', async (req, res) => {
+  try {
+    const { definition } = req.body;
+    const result = await bragGeneratorFlow({ definition }) as Awaited<ReturnType<typeof bragGeneratorFlow>> & { id: string };
+
+    const mapped = {
+      id: result.id,
+      titulo: result.title,
+      contexto: result.context,
+      impacto: `${result.actionTaken}\n\n${result.businessImpact}`,
+      metricas: result.metrics.join('. '),
+      tecnologias: result.technologiesUsed,
+    };
+
+    res.json(mapped);
+  } catch (err) {
+    console.error('Erro ao gerar brag:', err);
+    res.status(500).json({ error: 'Falha ao gerar Brag Document.' });
+  }
+});
 
 /**
  * Serve static files from /browser
