@@ -7,6 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "serve:ssr:brag-bot": "node dist/brag-bot/server/server.mjs",
     "genkit:ui": "genkit start -- npx tsx --watch src/genkit.ts"
   },
