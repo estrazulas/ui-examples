@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:brag-bot": "node dist/brag-bot/server/server.mjs"
+    "serve:ssr:brag-bot": "node dist/brag-bot/server/server.mjs",
+    "genkit:ui": "genkit start -- npx tsx --watch src/genkit.ts"
   },
   "private": true,
   "packageManager": "npm@11.11.0",

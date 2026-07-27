@@ -71,6 +71,48 @@ Objetivos de Interface e Roteamento:
    - Renderize os detalhes completos da conquista (Contexto, Impacto, Métricas e Tecnologias) com um layout de leitura agradável. Adicione um botão para "Voltar ao Dashboard".
 ```
 
+## Prompt (Spec 03)
+
+```
+Spec 03: Criação do Genkit Flow via MCP (Brag-Bot)
+
+Instrução Prévia: USE O MCP DO GENKIT. Consulte o contexto do MCP conectado para utilizar a sintaxe correta da API do Genkit.
+
+Atue como um Engenheiro de Software Sênior especialista na criação de aplicações baseadas em Inteligência Artificial utilizando o framework Firebase Genkit.
+
+Sua tarefa é criar um arquivo TypeScript (`src/genkit.ts`) que defina os esquemas de dados e um fluxo do Genkit para transformar os rascunhos informais de um usuário sobre suas realizações no trabalho em um "Brag Document" profissional e bem estruturado.
+
+Especificações Técnicas e de Configuração:
+1. Importe `genkit` e `z` de `genkit`.
+2. Importe o plugin do OpenAI: `openAI` do `@genkit-ai/compat-oai/openai`.
+3. Inicialize a instância do Genkit, configurando-o para usar o plugin do OpenAI e definindo como modelo padrão o `gpt-4o-mini` com uma temperatura de `0.8`.
+
+Especificação dos Schemas (utilize Zod e adicione `.describe()` em todos os campos para guiar a LLM):
+1. `BragInputSchema`: Deve conter um campo `definition` (string), que será o rascunho informal do usuário.
+2. `BragSchema` (o schema de saída rigoroso em JSON):
+   - `title`: string (Ex: Ação principal + Resultado de alto nível).
+   - `context`: string (Situação/Problema original. O que estava quebrado, lento, etc.).
+   - `actionTaken`: string (Ação técnica ou estratégica passo a passo tomada para resolver o problema).
+   - `businessImpact`: string (Qual o impacto de negócio. Tempo ganho, redução de falhas, etc.).
+   - `metrics`: array de strings (Apenas dados estritamente quantificáveis. Ex: "50% reduction").
+   - `technologiesUsed`: array de strings (Ferramentas, linguagens e plataformas mencionadas ou inferidas).
+
+Implementação do Fluxo (Flow):
+1. Crie e exporte um fluxo chamado `bragGeneratorFlow` usando `ai.defineFlow`.
+2. Configure-o para receber o `BragInputSchema` e retornar o `BragSchema`.
+3. No corpo do fluxo, construa uma string de `prompt` com o seguinte direcionamento:
+   - Persona: O modelo deve atuar como um "Senior Career Consultant" focado em Planos de Desenvolvimento Individual (IDP) para Engenheiros de Software.
+   - Objetivo: Transformar o rascunho informal do usuário em um "Brag Document" executivo.
+   - Regra 1: Usar tom profissional, objetivo e focado em impacto, sem adjetivos emocionais.
+   - Regra 2: Se não existirem métricas exatas, a IA deve inferir a natureza da métrica baseada na ação tomada.
+   - Regra 3: Seguir ESTRITAMENTE o formato do schema JSON (`BragSchema`).
+   - Regra 4: O output deve respeitar a linguagem original do input (se mandou em português, responde em português).
+4. Inclua o `input.definition` ao final desse prompt.
+5. Chame a geração de conteúdo do Genkit (`ai.generate`), passando o `prompt` montado e exigindo que o output obedeça ao `BragSchema`.
+6. Verifique se existe um output válido; caso não exista, solte um erro (`throw new Error`).
+7. O retorno final da função deve conter todas as propriedades mapeadas pela IA acrescidas de um campo `id` contendo a geração nativa de uma uuid (`crypto.randomUUID()`).
+```
+
 ## Comandos
 
 ### Desenvolvimento
