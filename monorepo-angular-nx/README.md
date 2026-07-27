@@ -1,107 +1,152 @@
-# New Nx Repository
+# monorepo-ui-openspec-examples
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+Plataforma de gerenciamento de eventos e palestras (CFP - Call for Papers) construída inteiramente via **OpenSpec**, um workflow spec-driven que gera proposals, designs, specs e tasks antes de qualquer código. Desenvolvida em monorepo Nx com Angular 21 no frontend e NestJS no backend.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## O que foi criado com OpenSpec
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/docs/technologies/typescript/introduction?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
-🚀 If you haven't connected to Nx Cloud yet, [complete your setup here](https://cloud.nx.app/get-started). Get faster builds with remote caching, distributed task execution, and self-healing CI. [See how your workspace can benefit](#nx-cloud).
-## Generate a library
+O projeto foi desenvolvido através de 3 changes arquivados no OpenSpec:
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+- **event-management** — CRUD completo de eventos, autenticação, dashboard com métricas e navegação
+- **cfp-feature** — submissão de palestras (Call for Papers) com formulário acessível
+- **create-events-test** — testes e2e com Cypress para validação do fluxo de cadastro de eventos
+
+## Tecnologias
+
+- **Frontend**: Angular 21 (Standalone Components, Signals, Control Flow `@if`/`@for`, Reactive Forms, Lazy Loading)
+- **Backend**: NestJS 11 (Controllers, Services, class-validator)
+- **Monorepo**: Nx 22 (task orchestration, module boundaries)
+- **Shared library**: `shared-types` (DTOs compartilhados entre frontend e backend)
+- **Testes unitários**: Jest + Vitest
+- **Testes e2e**: Playwright (multi-browser) + Cypress (incluindo AI-driven testing)
+- **Estilo**: CSS com glass-card design
+
+## Shared-types: contratos entre frontend e backend
+
+A biblioteca `@org/shared-types` define interfaces TypeScript que servem como contrato entre as camadas:
+
+```typescript
+// EventDto - usado por backend (retorno) e frontend (tipagem)
+export interface EventDto {
+  id: string;
+  nome: string;
+  endereco: string;
+  capacidade: number;
+  data: string;
+}
+
+// SpeakerDto - palestrante com informações da talk
+export interface SpeakerDto {
+  id: string;
+  nome: string;
+  email: string;
+  talkTitle: string;
+  isGDE: boolean;
+}
 ```
 
-## Run tasks
+O backend usa esses tipos como retorno dos endpoints. O frontend os importa para tipar as respostas HTTP. Os DTOs de criação (`CreateEventDto`, `CreateSpeakerDto`) implementam `Omit<Dto, 'id'>` com decorators do class-validator para validação automática.
 
-To build the library use:
+## Endpoints da API
 
-```sh
-npx nx run pkg1:build
-```
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/auth/login` | Login do organizador (retorna token) |
+| POST | `/events` | Criar evento |
+| GET | `/events` | Listar todos os eventos |
+| GET | `/events/:id` | Buscar evento por ID |
+| POST | `/cfp/submit` | Submeter proposta de palestra |
+| GET | `/cfp` | Listar palestrantes |
 
-To run any task with Nx use:
-
-```sh
-npx nx run <project-name>:<target>
-```
-
-These targets are either [inferred automatically](https://nx.dev/docs/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/docs/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
+## Telas da aplicação
 
 ```
-npx nx release
+┌─────────────────────────────────────────────────────────┐
+│  Dashboard  Eventos  Palestras  +Criar Evento  +CFP  Sair │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌──────────────┐  ┌──────────────┐                    │
+│  │ Eventos (5)  │  │ Palestras(3) │                    │
+│  │ • Evento A   │  │ • Talk X     │                    │
+│  │   2026-12-31 │  │   João Silva │                    │
+│  │ • Evento B   │  │ • Talk Y     │                    │
+│  │   2026-11-15 │  │   Maria O.   │                    │
+│  └──────────────┘  └──────────────┘                    │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+**Rotas:**
+- `/login` — autenticação do organizador
+- `/dashboard` — visão geral com contadores
+- `/events` — lista de eventos cadastrados
+- `/event/new` — formulário de criação (protegido por auth)
+- `/talks` — lista de palestras submetidas
+- `/cfp` — formulário de submissão de palestra
 
-[Learn more about Nx release &raquo;](https://nx.dev/docs/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Testes e2e
 
-## Keep TypeScript project references up to date
+O projeto possui testes end-to-end em três níveis:
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
+### Playwright (`frontend-e2e`)
+Testes multi-browser (Chromium, Firefox, WebKit) para validação de UI.
 
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
+```bash
+npx nx run frontend-e2e:e2e
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+### Cypress (`frontend-cypress-e2e`)
+Testes de fluxo completo com intercept de API e **AI-driven testing** usando `cy.prompt()` para interações semânticas.
 
-```sh
-npx nx sync:check
+```bash
+npx nx run frontend-cypress-e2e:e2e
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
-
-## Nx Cloud
-
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/docs/features/ci-features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/docs/features/ci-features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/docs/features/ci-features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/docs/features/ci-features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Set up CI (non-Github Actions CI)
-
-**Note:** This is only required if your CI provider is not GitHub Actions.
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
+Exemplo de teste AI-driven:
+```typescript
+cy.prompt([
+  'Type "Auditório Oracle" in the event name field',
+  'Type "Av. Dr. Chucri Zaidan, SP" in the address field',
+  'Click the button that submits or saves the event'
+]);
+cy.prompt(['Verify that a success message is visible']);
 ```
 
-[Learn more about Nx on CI](https://nx.dev/docs/features/ci-features?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### API e2e (`api-e2e`)
+Teste do endpoint raiz da API.
 
-## Install Nx Console
+```bash
+npx nx run api-e2e:e2e
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+## Como rodar
 
-[Install Nx Console &raquo;](https://nx.dev/docs/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+# Instalar dependências
+npm install
 
-## 🔗 Learn More
+# Rodar frontend (localhost:4200)
+npx nx serve frontend
 
-- [Nx Documentation](https://nx.dev/docs)
-- [Crafting Your Workspace Tutorial](https://nx.dev/docs/getting-started/tutorials/crafting-your-workspace)
-- [Module Boundaries](https://nx.dev/docs/features/enforce-module-boundaries)
-- [Releasing Packages](https://nx.dev/docs/features/manage-releases)
-- [Nx Plugins](https://nx.dev/docs/concepts/nx-plugins)
-- [Nx Cloud](https://nx.dev/nx-cloud)
+# Rodar backend
+npx nx serve api
 
-## 💬 Community
+# Rodar todos os testes unitários
+npx nx run-many -t test
 
-Join the Nx community:
+# Rodar visualização do grafo Nx
+npx nx graph
+```
 
-- [Discord](https://go.nx.dev/community)
-- [X (Twitter)](https://twitter.com/nxdevtools)
-- [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [YouTube](https://www.youtube.com/@nxdevtools)
-- [Blog](https://nx.dev/blog)
+## Estrutura do monorepo
+
+```
+monorepo-angular-nx/
+├── api/                    # Backend NestJS
+├── api-e2e/                # Testes e2e da API
+├── frontend/               # Frontend Angular 21
+├── frontend-e2e/           # Testes Playwright
+├── frontend-cypress-e2e/   # Testes Cypress
+├── shared-types/           # DTOs compartilhados
+├── packages/               # Bibliotecas reutilizáveis
+└── openspec/               # Specs e changes do OpenSpec
+```
