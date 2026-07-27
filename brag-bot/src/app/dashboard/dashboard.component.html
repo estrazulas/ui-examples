@@ -1,0 +1,35 @@
+<header class="header">
+  <h1>Brag-Bot | Pós IA UNIPDS</h1>
+</header>
+
+<section class="form-section">
+  <form (ngSubmit)="onSubmit()">
+    <textarea
+      [(ngModel)]="prompt"
+      name="prompt"
+      placeholder="Descreva sua conquista bruta..."
+      rows="4"
+    ></textarea>
+    <button type="submit" [disabled]="loading">
+      @if (loading) {
+        <span class="spinner"></span> Gerando...
+      } @else {
+        Destilar Conquista
+      }
+    </button>
+  </form>
+</section>
+
+<section class="cards-section">
+  @for (brag of brags; track brag.id) {
+    <a [routerLink]="['/detail', brag.id]" class="brag-card">
+      <h2>{{ brag.titulo }}</h2>
+      <p>{{ brag.contexto | slice:0:120 }}...</p>
+      <div class="tech-tags">
+        @for (tech of brag.tecnologias; track tech) {
+          <span class="tag">{{ tech }}</span>
+        }
+      </div>
+    </a>
+  }
+</section>

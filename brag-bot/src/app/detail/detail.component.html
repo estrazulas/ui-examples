@@ -1,0 +1,36 @@
+@if (brag(); as b) {
+  <article class="detail-page">
+    <a routerLink="/" class="back-btn">← Voltar ao Dashboard</a>
+
+    <h1>{{ b.titulo }}</h1>
+
+    <section class="detail-block">
+      <h2>Contexto</h2>
+      <p>{{ b.contexto }}</p>
+    </section>
+
+    <section class="detail-block">
+      <h2>Impacto</h2>
+      <p>{{ b.impacto }}</p>
+    </section>
+
+    <section class="detail-block">
+      <h2>Métricas</h2>
+      <p>{{ b.metricas }}</p>
+    </section>
+
+    <section class="detail-block">
+      <h2>Tecnologias</h2>
+      <div class="tech-tags">
+        @for (tech of b.tecnologias; track tech) {
+          <span class="tag">{{ tech }}</span>
+        }
+      </div>
+    </section>
+  </article>
+} @else {
+  <div class="detail-page">
+    <a routerLink="/" class="back-btn">← Voltar ao Dashboard</a>
+    <p>Conquista não encontrada.</p>
+  </div>
+}
