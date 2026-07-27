@@ -6,6 +6,11 @@
       "command": ["npx", "-y", "genkit-cli@1.40.1", "mcp", "--explicitProjectRoot", "--no-update-notification", "--non-interactive"],
       "cwd": ".",
       "enabled": true
+    },
+    "angular-cli": {
+      "type": "local",
+      "command": ["npx", "-y", "@angular/cli", "mcp"],
+      "enabled": true
     }
   }
 }

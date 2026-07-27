@@ -24,7 +24,7 @@ npm install tailwindcss @tailwindcss/postcss postcss --force
 npm install genkit @genkit-ai/compat-oai dotenv
 ```
 
-### Configurar MCP do Genkit (opencode.jsonc)
+### Configurar MCP (opencode.jsonc)
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
@@ -35,26 +35,14 @@ npm install genkit @genkit-ai/compat-oai dotenv
       "cwd": ".",
       "enabled": true
     },
-    "context7": {
+    "angular-cli": {
       "type": "local",
-      "command": ["npx", "-y", "@upstash/context7-mcp"],
-      "cwd": ".",
-      "enabled": true,
-      "env": {
-        "CONTEXT7_API_KEY": "sua-chave-aqui"
-      }
-    },
-    "playwright": {
-      "type": "local",
-      "command": ["npx", "-y", "@anthropic-ai/playwright-mcp"],
-      "cwd": ".",
+      "command": ["npx", "-y", "@angular/cli", "mcp"],
       "enabled": true
     }
   }
 }
 ```
-
-> **Context7 API Key**: Obtenha em https://context7.com. Configure via campo `env` no `opencode.jsonc` ou exporte no shell: `export CONTEXT7_API_KEY=sua-chave`. Nunca commite a chave no repositório.
 
 ### Variáveis de ambiente
 Crie um `.env` na raiz:
