@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { BragService } from '../brag.service';
+import { SUPPORTED_LANGUAGES } from '../../prompts/few-shots';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,6 +14,7 @@ import { BragService } from '../brag.service';
 export class DashboardComponent {
   private bragService = inject(BragService);
   prompt = '';
+  supportedLanguages = SUPPORTED_LANGUAGES;
 
   get brags() {
     return this.bragService.brags();

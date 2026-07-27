@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { genkit, z } from 'genkit';
 import { openAI } from '@genkit-ai/compat-oai/openai';
 import { franc } from 'franc';
+import { FEW_SHOTS } from './prompts/few-shots';
 
 const ai = genkit({ plugins: [openAI()] });
 
@@ -26,10 +27,17 @@ export const bragGeneratorFlow = ai.defineFlow(
   },
   async (input) => {
     const langCode = franc(input.definition);
+    const fewShot = FEW_SHOTS[langCode];
 
-    const prompt = `DETECÇÃO DE IDIOMA: O idioma detectado no input é "${langCode}" (código ISO 639-3).
-TODO o output (title, context, actionTaken, businessImpact, metrics) DEVE ser escrito EXCLUSIVAMENTE no MESMO idioma do input.
-NUNCA misture idiomas. NUNCA traduza. Esta é a regra mais importante.
+    const languageInstruction = fewShot
+      ? `DETECÇÃO DE IDIOMA: O input abaixo está em ${fewShot.langName} (código ISO 639-3: "${langCode}").
+TODO o output (title, context, actionTaken, businessImpact, metrics) DEVE ser escrito EXCLUSIVAMENTE em ${fewShot.langName}.
+NUNCA misture idiomas. NUNCA traduza. Esta é a regra mais importante.`
+      : `DETECÇÃO DE IDIOMA: O idioma detectado no input é "${langCode}" (código ISO 639-3).
+TODO o output DEVE ser escrito EXCLUSIVAMENTE no MESMO idioma do input.
+NUNCA misture idiomas. NUNCA traduza. Esta é a regra mais importante.`;
+
+    const prompt = `${languageInstruction}
 
 Atue como um "Senior Career Consultant" focado em Planos de Desenvolvimento Individual (IDP) para Engenheiros de Software.
 
@@ -41,25 +49,8 @@ Regras:
 3. Siga ESTRITAMENTE o formato do schema JSON fornecido. Retorne APENAS um objeto com as chaves: title, context, actionTaken, businessImpact, metrics, technologiesUsed.
 4. Os campos "metrics" e "technologiesUsed" DEVEM ser arrays de strings, não objetos ou strings únicas.
 
-${langCode === 'eng' ? `Exemplo de output esperado (input em inglês):
-{
-  "title": "Implemented Redis caching layer reducing API latency by 80%",
-  "context": "The API suffered from high latency and timeouts during traffic spikes.",
-  "actionTaken": "Designed and deployed a Redis-based caching strategy for frequently accessed endpoints.",
-  "businessImpact": "80% latency reduction eliminated timeouts during peak hours and improved user experience.",
-  "metrics": ["80% reduction in API latency", "Zero timeouts during peak traffic"],
-  "technologiesUsed": ["Redis", "Node.js", "Express"]
-}
-
-` : langCode === 'por' ? `Exemplo de output esperado (input em português):
-{
-  "title": "Implementação de cache Redis reduzindo latência da API em 80%",
-  "context": "A API apresentava alta latência e timeouts durante picos de acesso.",
-  "actionTaken": "Projetou e implementou estratégia de cache com Redis para endpoints mais acessados.",
-  "businessImpact": "Redução de 80% na latência eliminou timeouts em horários de pico e melhorou a experiência do usuário.",
-  "metrics": ["80% de redução na latência da API", "Zero timeouts durante tráfego de pico"],
-  "technologiesUsed": ["Redis", "Node.js", "Express"]
-}
+${fewShot ? `Exemplo de output esperado (input em ${fewShot.langName}):
+${fewShot.example}
 
 ` : ''}Rascunho do usuário:
 ${input.definition}`;
